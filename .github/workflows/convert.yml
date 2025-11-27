@@ -1,0 +1,33 @@
+name: Build-HLS-Upload-R2
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GH_PAT || github.token }}
+
+      - name: Install ffmpeg + aws-cli
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg awscli
+          pip install -r requirements.txt
+
+      - name: Configure AWS CLI for R2
+        run: |
+          aws configure set aws_access_key_id     "${{ secrets.AWS_ACCESS_KEY }}"
+          aws configure set aws_secret_access_key "${{ secrets.AWS_SECRET_KEY }}"
+          aws configure set region                "auto"
+
+      - name: convert
+        run: |
+          python main.py --fateactor-username "${{ secrets.FATEACTOR_USERNAME }}" \
+            --fateactor-password "${{ secrets.FATEACTOR_PASSWORD }}" \
+            --r2-bucket "${{ secrets.R2_BUCKET }}" \
+            --r2-endpoint "${{ secrets.R2_ENDPOINT }}"
