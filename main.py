@@ -37,12 +37,10 @@ def main():
         did = job["author"]
         cid = job['cid']
         job_id = job['id']
-        download_url = f'https://{job["pds"]}/xrpc/com.atproto.sync.getBlob?did={did}&cid={cid}'
+        download_url = f'{job["pds"]}/xrpc/com.atproto.sync.getBlob?did={did}&cid={cid}'
         video_file = '/tmp/video.mp4'
         cmd = f'curl -m 120 -L -o {video_file} "{download_url}"'
-
-        if options.dev:
-            print(cmd)
+        print(cmd)
 
         if not options.skip_download:
             result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
