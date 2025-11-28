@@ -37,14 +37,21 @@ def main():
         did = job["author"]
         cid = job['cid']
         job_id = job['id']
-        download_url = f'{job["pds"]}/xrpc/com.atproto.sync.getBlob?did={did}&cid={cid}'
+        print(f'process job: {job_id} ...')
         video_file = '/tmp/video.mp4'
-        cmd = f'curl -m 120 -L -o {video_file} "{download_url}"'
-        print(cmd)
+        cmd = (f'aws s3 cp "s3://{options.r2_bucket}/{did}/{cid}/video.mp4" "{video_file}" '
+               f'--endpoint-url="{options.r2_endpoint}"')
+
+        if options.dev:
+            print(cmd)
 
         if not options.skip_download:
             result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-            print(f'download result: {result.stderr} {result.stdout}')
+
+            if result.returncode != 0:
+                print(f's3 cp: {result.stderr} {result.stdout}')
+                update_job(job_id, 'error')
+                continue
 
         work_dir = f'/tmp/{did}/{cid}'
         subprocess.run(f'mkdir -p {work_dir}', shell=True, capture_output=True, text=True)
@@ -90,7 +97,7 @@ def main():
         result = subprocess.run(
             (f'aws s3 sync "{work_dir}" '
              f'"s3://{options.r2_bucket}/{did}/{cid}/" '
-             f'--endpoint-url="{options.r2_endpoint}"')
+             f'--endpoint-url="{options.r2_endpoint}" --delete')
             , shell=True, capture_output=True, text=True)
 
         if result.returncode != 0:
