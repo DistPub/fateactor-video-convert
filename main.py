@@ -88,10 +88,10 @@ def main():
             return
 
         result = subprocess.run(
-            f'aws s3 sync "{work_dir}" \
-              "s3://${options.r2_bucket}/{did}/{cid}/" \
-              --endpoint-url="${options.r2_endpoint}"'
-        , shell=True, capture_output=True, text=True)
+            (f'aws s3 sync "{work_dir}" '
+             f'"s3://{options.r2_bucket}/{did}/{cid}/" '
+             f'--endpoint-url="{options.r2_endpoint}"')
+            , shell=True, capture_output=True, text=True)
 
         if result.returncode != 0:
             print(f's3 error: {result.stderr} {result.stdout}')
