@@ -15,8 +15,8 @@ jobs:
 
       - name: Install ffmpeg + aws-cli
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg awscli
+          sudo apt update
+          sudo snap install aws-cli --classic
           pip install -r requirements.txt
 
       - name: Configure AWS CLI for R2
